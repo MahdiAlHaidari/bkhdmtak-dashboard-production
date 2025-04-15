@@ -131,7 +131,7 @@ export function RecentBookings() {
               <div className="flex items-center gap-2">
                 <Avatar className="h-8 w-8">
                   <AvatarImage
-                    src={getImageUrl(order.user.imagePath, true) || "/placeholder.svg"}
+                    src={getImageUrl(order.user.imagePath, true)}
                     alt={order.user.name}
                     onError={handleImageError}
                   />
@@ -188,7 +188,7 @@ export function RecentBookings() {
                 <div className="flex items-center gap-2">
                   <Avatar className="h-8 w-8">
                     <AvatarImage
-                      src={getImageUrl(order.user.imagePath, true) || "/placeholder.svg"}
+                      src={getImageUrl(order.user.imagePath, true)}
                       alt={order.user.name}
                       onError={handleImageError}
                     />

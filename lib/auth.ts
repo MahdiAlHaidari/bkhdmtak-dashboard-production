@@ -18,7 +18,7 @@ export interface LoginCredentials {
 // Function to login user
 export async function loginUser(credentials: LoginCredentials): Promise<LoginResponse> {
   try {
-    const response = await fetch("https://backend.bkhdmtak.app/Admin/Auth/Login", {
+    const response = await fetch("https://prod-backend.bkhdmtak.app/Admin/Auth/Login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

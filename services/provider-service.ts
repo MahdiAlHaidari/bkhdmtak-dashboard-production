@@ -50,7 +50,6 @@ export async function updateProviderStatus(id: number, isActive: boolean): Promi
 export async function getProviderWithCategories(id: number): Promise<ProviderWithCategories> {
   const token = getAuthToken()
 
-  // Updated endpoint to use the new route
   const response = await fetch(`${API_BASE_URL}/Admin/ProviderCategory/GetProviderWithCategories/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -72,7 +71,6 @@ export async function updateProviderCategoryStatus(
 ): Promise<void> {
   const token = getAuthToken()
 
-  // Updated endpoint to use the new route and PATCH method
   const response = await fetch(`${API_BASE_URL}/Admin/ProviderCategory`, {
     method: "PATCH",
     headers: {

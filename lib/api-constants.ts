@@ -1,6 +1,7 @@
 // API Base URLs
-export const API_BASE_URL = "https://backend.bkhdmtak.app"
-export const IMAGE_BASE_URL = "https://backend.bkhdmtak.app/Media/"
+export const API_BASE_URL = "https://prod-backend.bkhdmtak.app"
+
+export const IMAGE_BASE_URL = "https://prod-bk-v2.s3.eu-north-1.amazonaws.com/Media/"
 export const MEDIA_PATH = "Media/"
 
 // Helper function to construct image URLs
