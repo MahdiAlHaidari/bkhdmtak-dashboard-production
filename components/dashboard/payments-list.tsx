@@ -21,7 +21,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { toast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { formatDate } from "@/lib/utils"
 import { AlertCircle, CheckCircle2, Eye, FileSpreadsheet, Loader2 } from "lucide-react"
 import { PaymentDetailsDialog } from "./payment-details-dialog"
 import type { Payment } from "@/services/types"
@@ -65,6 +64,18 @@ export function PaymentsList() {
   const status = searchParams.get("status") || ""
 
   const [statusFilter, setStatusFilter] = useState(status)
+
+  // Define formatDate function locally
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return new Intl.DateTimeFormat("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(date)
+  }
 
   useEffect(() => {
     async function fetchPayments() {

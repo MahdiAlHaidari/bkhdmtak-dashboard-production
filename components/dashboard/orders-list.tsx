@@ -449,77 +449,87 @@ export function OrdersList() {
     </div>
   )
 
-  if (isMobile) {
-    return (
-      <div>
-        {filterUI}
-        <div className="space-y-4">
-          {orders.map((order) => (
-            <div key={order.id} className="rounded-lg border p-4">
-              <div className="flex items-center justify-between">
-                <div className="font-medium">Order #{order.id}</div>
-                <div>{getStatusBadge(order.orderStatus)}</div>
+  // Modify the mobile view return statement to not include an early return
+  // Instead, we'll use conditional rendering for the content
+
+  // Replace the entire if (isMobile) { return (...) } block with:
+  const content = isMobile ? (
+    <div>
+      {filterUI}
+      <div className="space-y-4">
+        {orders.map((order) => (
+          <div key={order.id} className="rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+              <div className="font-medium">Order #{order.id}</div>
+              <div>{getStatusBadge(order.orderStatus)}</div>
+            </div>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <div className="text-muted-foreground">Customer</div>
+                <div className="mt-1">{order.user?.name || "N/A"}</div>
               </div>
-              <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <div className="text-muted-foreground">Customer</div>
-                  <div className="mt-1">{order.user.name}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Provider</div>
-                  <div className="mt-1">{order.provider ? order.provider.name : "N/A"}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Total</div>
-                  <div className="mt-1 font-medium">{order.total.toLocaleString()} IQD</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Date</div>
-                  <div className="mt-1">{new Date(order.createdAt).toLocaleDateString()}</div>
-                </div>
+              <div>
+                <div className="text-muted-foreground">Provider</div>
+                <div className="mt-1">{order.provider?.name || "N/A"}</div>
               </div>
-              <div className="mt-3">
-                <Button variant="outline" size="sm" className="w-full" onClick={() => viewOrderDetails(order)}>
-                  <Eye className="mr-1 h-3 w-3" />
-                  View Details
-                </Button>
+              <div>
+                <div className="text-muted-foreground">Total</div>
+                <div className="mt-1 font-medium">{order.total?.toLocaleString() || 0} IQD</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Date</div>
+                <div className="mt-1">{order.createdAt ? new Date(order.createdAt).toLocaleDateString() : "N/A"}</div>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Pagination for mobile */}
-        <div className="mt-4">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
-                  disabled={pageNumber <= 1}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink isActive>{pageNumber}</PaginationLink>
-              </PaginationItem>
-              {pageNumber < totalPages && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={pageNumber >= totalPages}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+            <div className="mt-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full"
+                onClick={() => viewOrderDetails(order)}
+                disabled={loading}
+              >
+                {loading ? (
+                  <div className="h-3 w-3 animate-spin rounded-full border-b-2 border-t-2 border-blue-600 mr-1"></div>
+                ) : (
+                  <Eye className="mr-1 h-3 w-3" />
+                )}
+                View Details
+              </Button>
+            </div>
+          </div>
+        ))}
       </div>
-    )
-  }
 
-  return (
+      {/* Pagination for mobile */}
+      <div className="mt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
+                disabled={pageNumber <= 1}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink isActive>{pageNumber}</PaginationLink>
+            </PaginationItem>
+            {pageNumber < totalPages && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
+                disabled={pageNumber >= totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </div>
+  ) : (
     <div>
       {filterUI}
       <div className="overflow-x-auto">
@@ -539,11 +549,11 @@ export function OrdersList() {
             {orders.map((order) => (
               <TableRow key={order.id}>
                 <TableCell className="font-medium">#{order.id}</TableCell>
-                <TableCell>{order.user.name}</TableCell>
-                <TableCell>{order.provider ? order.provider.name : "N/A"}</TableCell>
+                <TableCell>{order.user?.name || "N/A"}</TableCell>
+                <TableCell>{order.provider?.name || "N/A"}</TableCell>
                 <TableCell>{formatDate(order.createdAt)}</TableCell>
                 <TableCell>{getStatusBadge(order.orderStatus)}</TableCell>
-                <TableCell className="font-medium">{order.total.toLocaleString()} IQD</TableCell>
+                <TableCell className="font-medium">{order.total?.toLocaleString() || 0} IQD</TableCell>
                 <TableCell className="text-right">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -617,8 +627,15 @@ export function OrdersList() {
           </PaginationContent>
         </Pagination>
       </div>
+    </div>
+  )
 
-      {/* Order Details Dialog */}
+  // Return the final component
+  return (
+    <div>
+      {content}
+
+      {/* Order Details Dialog - now outside the conditional rendering */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-auto">
           <DialogHeader>
@@ -654,12 +671,12 @@ export function OrdersList() {
                 <h4 className="text-lg font-semibold mb-2">Customer</h4>
                 <div className="flex items-center gap-3 p-3 border rounded-md">
                   <Avatar className="h-10 w-10">
-                    <AvatarFallback>{selectedOrder.user.name.charAt(0)}</AvatarFallback>
+                    <AvatarFallback>{selectedOrder.user?.name?.charAt(0) || "U"}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">{selectedOrder.user.name}</p>
-                    <p className="text-sm text-muted-foreground">Phone: {selectedOrder.user.phoneNumber}</p>
-                    <p className="text-sm text-muted-foreground">ID: {selectedOrder.user.id}</p>
+                    <p className="font-medium">{selectedOrder.user?.name || "N/A"}</p>
+                    <p className="text-sm text-muted-foreground">Phone: {selectedOrder.user?.phoneNumber || "N/A"}</p>
+                    <p className="text-sm text-muted-foreground">ID: {selectedOrder.user?.id || "N/A"}</p>
                   </div>
                 </div>
               </div>
@@ -683,12 +700,14 @@ export function OrdersList() {
                   <h4 className="text-lg font-semibold mb-2">Provider</h4>
                   <div className="flex items-center gap-3 p-3 border rounded-md">
                     <Avatar className="h-10 w-10">
-                      <AvatarFallback>{selectedOrder.provider.name.charAt(0)}</AvatarFallback>
+                      <AvatarFallback>{selectedOrder.provider.name?.charAt(0) || "P"}</AvatarFallback>
                     </Avatar>
                     <div>
                       <p className="font-medium">{selectedOrder.provider.name}</p>
-                      <p className="text-sm text-muted-foreground">Phone: {selectedOrder.provider.phoneNumber}</p>
-                      <p className="text-sm text-muted-foreground">Email: {selectedOrder.provider.email}</p>
+                      <p className="text-sm text-muted-foreground">
+                        Phone: {selectedOrder.provider.phoneNumber || "N/A"}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Email: {selectedOrder.provider.email || "N/A"}</p>
                       <p className="text-sm text-muted-foreground">ID: {selectedOrder.provider.id}</p>
                     </div>
                   </div>

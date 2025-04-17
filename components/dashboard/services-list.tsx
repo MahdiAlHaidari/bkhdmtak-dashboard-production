@@ -323,80 +323,77 @@ export function ServicesList() {
     e.target.src = "/placeholder.svg?height=200&width=200"
   }
 
-  if (isMobile) {
-    return (
-      <div>
-        {filterUI}
-        <div className="space-y-4">
-          {filteredServices.map((service) => (
-            <div key={service.id} className="rounded-lg border p-4">
-              <div className="flex items-center justify-between">
-                <div className="font-medium">{service.name}</div>
-                <div>{getApprovalBadge(service.isApproved)}</div>
+  // Determine which content to show based on screen size
+  const content = isMobile ? (
+    <>
+      {filterUI}
+      <div className="space-y-4">
+        {filteredServices.map((service) => (
+          <div key={service.id} className="rounded-lg border p-4">
+            <div className="flex items-center justify-between">
+              <div className="font-medium">{service.name}</div>
+              <div>{getApprovalBadge(service.isApproved)}</div>
+            </div>
+            <div className="mt-2 text-sm text-muted-foreground line-clamp-2">{service.description}</div>
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <div>
+                <div className="text-muted-foreground">Price</div>
+                <div className="mt-1">{formatPrice(service.price, service.discountAmount)}</div>
               </div>
-              <div className="mt-2 text-sm text-muted-foreground line-clamp-2">{service.description}</div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <div className="text-muted-foreground">Price</div>
-                  <div className="mt-1">{formatPrice(service.price, service.discountAmount)}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Platform Fee</div>
-                  <div className="mt-1">{service.platformRation}%</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Provider ID</div>
-                  <div className="mt-1">{service.providerId}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Category</div>
-                  <div className="mt-1">
-                    {service.categoryId} / {service.subCategoryId}
-                  </div>
-                </div>
+              <div>
+                <div className="text-muted-foreground">Platform Fee</div>
+                <div className="mt-1">{service.platformRation}%</div>
               </div>
-              <div className="mt-3">
-                <Button variant="outline" size="sm" className="w-full" onClick={() => viewServiceDetails(service.id)}>
-                  View Details
-                </Button>
+              <div>
+                <div className="text-muted-foreground">Provider ID</div>
+                <div className="mt-1">{service.providerId}</div>
+              </div>
+              <div>
+                <div className="text-muted-foreground">Category</div>
+                <div className="mt-1">
+                  {service.categoryId} / {service.subCategoryId}
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-
-        {/* Pagination for mobile */}
-        <div className="mt-4">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
-                  disabled={pageNumber <= 1}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink isActive>{pageNumber}</PaginationLink>
-              </PaginationItem>
-              {pageNumber < totalPages && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={pageNumber >= totalPages}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+            <div className="mt-3">
+              <Button variant="outline" size="sm" className="w-full" onClick={() => viewServiceDetails(service.id)}>
+                View Details
+              </Button>
+            </div>
+          </div>
+        ))}
       </div>
-    )
-  }
 
-  return (
-    <div>
+      {/* Pagination for mobile */}
+      <div className="mt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
+                disabled={pageNumber <= 1}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink isActive>{pageNumber}</PaginationLink>
+            </PaginationItem>
+            {pageNumber < totalPages && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
+                disabled={pageNumber >= totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </>
+  ) : (
+    <>
       {filterUI}
       <div className="overflow-x-auto">
         <Table>
@@ -503,8 +500,15 @@ export function ServicesList() {
           </PaginationContent>
         </Pagination>
       </div>
+    </>
+  )
 
-      {/* Service Details Dialog */}
+  // Return the main component with the Dialog outside the conditional rendering
+  return (
+    <div>
+      {content}
+
+      {/* Service Details Dialog - moved outside conditional rendering */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-auto">
           <DialogHeader>

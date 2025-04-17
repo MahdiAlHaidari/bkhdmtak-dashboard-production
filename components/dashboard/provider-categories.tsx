@@ -1,13 +1,12 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useEffect } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { CheckCircle, XCircle } from "lucide-react"
+import { CheckCircle, XCircle, LogOut, RefreshCw } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import type { ProviderWithCategories } from "@/services/types"
 import { getProviderWithCategories, updateProviderCategoryStatus } from "@/services/provider-service"
@@ -22,12 +21,50 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { ErrorDisplay } from "@/components/ui/error-display"
 import { getImageUrl } from "@/lib/api-constants"
+import { useAuth } from "@/contexts/auth-context"
+import { useRouter } from "next/navigation"
 
 interface ProviderCategoriesProps {
   providerId: number
   onClose: () => void
+}
+
+interface ErrorDisplayProps {
+  message: string
+  onRetry?: () => void
+}
+
+function ErrorDisplay({ message, onRetry }: ErrorDisplayProps) {
+  const { logout } = useAuth()
+  const router = useRouter()
+
+  const handleLoginAgain = () => {
+    logout()
+    router.push("/login")
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center p-4 text-center">
+      <div className="rounded-full bg-red-100 p-3 text-red-600 mb-4">
+        <XCircle className="h-6 w-6" />
+      </div>
+      <h3 className="text-lg font-medium text-red-600 mb-2">Error</h3>
+      <p className="text-sm text-gray-600 mb-4">{message}</p>
+      <div className="flex gap-2">
+        {onRetry && (
+          <Button variant="outline" onClick={onRetry}>
+            <RefreshCw className="mr-2 h-4 w-4" />
+            Try Again
+          </Button>
+        )}
+        <Button variant="destructive" onClick={handleLoginAgain}>
+          <LogOut className="mr-2 h-4 w-4" />
+          Login Again
+        </Button>
+      </div>
+    </div>
+  )
 }
 
 export function ProviderCategories({ providerId, onClose }: ProviderCategoriesProps) {
@@ -138,11 +175,11 @@ export function ProviderCategories({ providerId, onClose }: ProviderCategoriesPr
   }
 
   if (error) {
-    return <ErrorDisplay message={error} />
+    return <ErrorDisplay message={error} onRetry={fetchProviderWithCategories} />
   }
 
   if (!providerData) {
-    return <ErrorDisplay message="No provider data found" />
+    return <ErrorDisplay message="No provider data found" onRetry={fetchProviderWithCategories} />
   }
 
   const { provider, providerCategories } = providerData
@@ -151,7 +188,7 @@ export function ProviderCategories({ providerId, onClose }: ProviderCategoriesPr
   const providerInfo = (
     <div className="flex items-center gap-3 mb-6">
       <Avatar className="h-12 w-12">
-        <AvatarImage src={getImageUrl(provider.imagePath, true)} alt={provider.name} onError={handleImageError} />
+        <AvatarImage src={getImageUrl(provider.imagePath)} alt={provider.name} onError={handleImageError} />
         <AvatarFallback>{provider.name.charAt(0)}</AvatarFallback>
       </Avatar>
       <div>
@@ -177,7 +214,7 @@ export function ProviderCategories({ providerId, onClose }: ProviderCategoriesPr
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="font-medium">
-                      {pc.category.nameEn || `Category ${pc.category.id}`}{" "}
+                      {pc.category.nameEn || `Category ID: ${pc.category.id}`}
                       {pc.category.nameAr && `(${pc.category.nameAr})`}
                     </div>
                     <div className="mt-1">{getStatusBadge(pc.isApproved)}</div>
@@ -237,8 +274,8 @@ export function ProviderCategories({ providerId, onClose }: ProviderCategoriesPr
               {providerCategories.map((pc) => (
                 <TableRow key={pc.category.id}>
                   <TableCell>{pc.category.id}</TableCell>
-                  <TableCell>{pc.category.nameEn || `Category ${pc.category.id}`}</TableCell>
-                  <TableCell>{pc.category.nameAr || "-"}</TableCell>
+                  <TableCell>{pc.category.nameEn || "Not specified"}</TableCell>
+                  <TableCell>{pc.category.nameAr || "Not specified"}</TableCell>
                   <TableCell>{getStatusBadge(pc.isApproved)}</TableCell>
                   <TableCell className="text-right">
                     <Button

@@ -14,56 +14,11 @@ export interface Provider {
   name: string
   phoneNumber: string
   imagePath: string | null
-  email?: string | null
-  countryId?: number | null
-  cityId?: number | null
-  stateId?: number | null
-  isAvailable: boolean
+  latitude: number | null
+  longitude: number | null
   isActive: boolean
-  practicingImage?: string | null
-  unifiedCardImageFront?: string | null
-  residenceCardImageFront?: string | null
-  residenceCardImageBack?: string | null
-  unifiedCardImageBack?: string | null
-  accountOrCardNumber?: string | null
-  currentLatitude?: number | null
-  currentLongitude?: number | null
-  distanceInKm?: number | null
-  createdAt?: string
-  updatedAt?: string
-}
-
-// Provider with categories
-export interface ProviderWithCategories {
-  provider: Provider
-  providerCategories: {
-    category: {
-      id: number
-      nameAr: string | null
-      nameEn: string | null
-      descriptionAr?: string | null
-      descriptionEn?: string | null
-      markerImage?: string | null
-      image?: string | null
-      colorCode?: string | null
-      platformDiscount?: number | null
-      created?: string
-      createdBy?: string | null
-      lastModified?: string
-      lastModifiedBy?: string | null
-    }
-    isApproved: boolean
-  }[]
-}
-
-// Provider list params
-export interface ProviderListParams {
-  pageSize?: number
-  pageNumber?: number
-  name?: string
-  phoneNumber?: string
-  active?: boolean
-  available?: boolean
+  createdAt: string
+  updatedAt: string
 }
 
 // Category types
@@ -240,4 +195,46 @@ export interface PaginatedResponse<T> {
   totalCount: number
   hasPreviousPage: boolean
   hasNextPage: boolean
+}
+
+export interface ProviderWithCategories {
+  provider: {
+    id: number
+    name: string
+    phoneNumber: string
+    imagePath: string | null
+    email: string | null
+    countryId: number | null
+    cityId: number | null
+    stateId: number | null
+    isAvailable: boolean | null
+    isActive: boolean | null
+    practicingImage: string | null
+    unifiedCardImageFront: string | null
+    accountOrCardNumber: string | null
+    residenceCardImageFront: string | null
+    residenceCardImageBack: string | null
+    unifiedCardImageBack: string | null
+    currentLatitude: number | null
+    currentLongitude: number | null
+    distanceInKm?: number | null
+  }
+  providerCategories: {
+    category: {
+      id: number
+      nameAr: string | null
+      nameEn: string | null
+      descriptionAr: string | null
+      descriptionEn: string | null
+      markerImage: string | null
+      image: string | null
+      colorCode: string | null
+      platformDiscount: number | null
+      created: string
+      createdBy: string | null
+      lastModified: string
+      lastModifiedBy: string | null
+    }
+    isApproved: boolean
+  }[]
 }

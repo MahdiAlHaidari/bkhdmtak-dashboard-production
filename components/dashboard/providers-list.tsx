@@ -392,110 +392,127 @@ export function ProvidersList() {
     </div>
   )
 
-  if (isMobile) {
-    return (
-      <div>
-        {filterUI}
-        <div className="space-y-4">
-          {providers.map((provider) => (
-            <div key={provider.id} className="rounded-lg border p-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={getImageUrl(provider.imagePath, true)}
-                      alt={provider.name}
-                      onError={handleImageError}
-                    />
-                    <AvatarFallback>{provider.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-medium">{provider.name}</div>
-                    <div className="text-xs text-muted-foreground">{provider.email || provider.phoneNumber}</div>
-                  </div>
-                </div>
-                <Button variant="outline" size="sm" onClick={() => viewProviderDetails(provider)}>
-                  <Eye className="mr-1 h-3 w-3" />
-                  View
-                </Button>
-              </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                <div>
-                  <div className="text-muted-foreground">Status</div>
-                  <div className="mt-1">{getStatusBadge(provider.isActive)}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Availability</div>
-                  <div className="mt-1">{getAvailabilityBadge(provider.isAvailable)}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Phone</div>
-                  <div className="mt-1">{provider.phoneNumber}</div>
-                </div>
-                <div>
-                  <div className="text-muted-foreground">Location</div>
-                  <div className="mt-1">{provider.cityId ? `City ID: ${provider.cityId}` : "Not specified"}</div>
-                </div>
-              </div>
-              <div className="mt-3 flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={provider.isActive ? "text-red-600" : "text-green-600"}
-                  onClick={() => confirmStatusUpdate(provider, !provider.isActive)}
-                >
-                  {provider.isActive ? (
-                    <>
-                      <XCircle className="mr-1 h-3 w-3" /> Deactivate
-                    </>
-                  ) : (
-                    <>
-                      <CheckCircle className="mr-1 h-3 w-3" /> Activate
-                    </>
-                  )}
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => viewProviderCategories(provider.id)}>
-                  <ListFilter className="mr-1 h-3 w-3" /> Categories
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+  // Replace the entire rendering logic (from the loading check to the end of the component) with this structure:
 
-        {/* Pagination for mobile */}
-        <div className="mt-4">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
-                  disabled={pageNumber <= 1}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink isActive>{pageNumber}</PaginationLink>
-              </PaginationItem>
-              {pageNumber < totalPages && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={pageNumber >= totalPages}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+  // First, keep the loading and error checks
+  if (loading && providers.length === 0) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-600"></div>
       </div>
     )
   }
 
-  return (
-    <div>
-      {filterUI}
+  if (error && providers.length === 0) {
+    return (
+      <div className="flex justify-center items-center py-8 text-red-500">
+        <p>{error}</p>
+      </div>
+    )
+  }
+
+  // Define the mobile UI
+  const mobileUI = (
+    <div className="space-y-4">
+      {providers.map((provider) => (
+        <div key={provider.id} className="rounded-lg border p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Avatar className="h-10 w-10">
+                <AvatarImage
+                  src={getImageUrl(provider.imagePath, true) || "/placeholder.svg"}
+                  alt={provider.name}
+                  onError={handleImageError}
+                />
+                <AvatarFallback>{provider.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <div className="font-medium">{provider.name}</div>
+                <div className="text-xs text-muted-foreground">{provider.email || provider.phoneNumber}</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+            <div>
+              <div className="text-muted-foreground">Status</div>
+              <div className="mt-1">{getStatusBadge(provider.isActive)}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Availability</div>
+              <div className="mt-1">{getAvailabilityBadge(provider.isAvailable)}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Phone</div>
+              <div className="mt-1">{provider.phoneNumber}</div>
+            </div>
+            <div>
+              <div className="text-muted-foreground">Location</div>
+              <div className="mt-1">{provider.cityId ? `City ID: ${provider.cityId}` : "Not specified"}</div>
+            </div>
+          </div>
+          <div className="mt-3 flex flex-col gap-2">
+            <Button variant="outline" size="sm" onClick={() => viewProviderDetails(provider)}>
+              <Eye className="mr-1 h-3 w-3" />
+              View Details
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className={provider.isActive ? "text-red-600" : "text-green-600"}
+              onClick={() => confirmStatusUpdate(provider, !provider.isActive)}
+            >
+              {provider.isActive ? (
+                <>
+                  <XCircle className="mr-1 h-3 w-3" /> Deactivate
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="mr-1 h-3 w-3" /> Activate
+                </>
+              )}
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => viewProviderCategories(provider.id)}>
+              <ListFilter className="mr-1 h-3 w-3" /> Categories
+            </Button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+
+  // Define the mobile pagination
+  const mobilePagination = (
+    <div className="mt-4">
+      <Pagination>
+        <PaginationContent>
+          <PaginationItem>
+            <PaginationPrevious
+              onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
+              disabled={pageNumber <= 1}
+            />
+          </PaginationItem>
+          <PaginationItem>
+            <PaginationLink isActive>{pageNumber}</PaginationLink>
+          </PaginationItem>
+          {pageNumber < totalPages && (
+            <PaginationItem>
+              <PaginationEllipsis />
+            </PaginationItem>
+          )}
+          <PaginationItem>
+            <PaginationNext
+              onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
+              disabled={pageNumber >= totalPages}
+            />
+          </PaginationItem>
+        </PaginationContent>
+      </Pagination>
+    </div>
+  )
+
+  // Define the desktop UI
+  const desktopUI = (
+    <>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -515,7 +532,7 @@ export function ProvidersList() {
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
                       <AvatarImage
-                        src={getImageUrl(provider.imagePath, true)}
+                        src={getImageUrl(provider.imagePath, true) || "/placeholder.svg"}
                         alt={provider.name}
                         onError={handleImageError}
                       />
@@ -564,7 +581,6 @@ export function ProvidersList() {
         </Table>
       </div>
 
-      {/* Pagination */}
       <div className="mt-4 flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
           Showing {providers.length} of {totalCount} providers
@@ -615,8 +631,25 @@ export function ProvidersList() {
           </PaginationContent>
         </Pagination>
       </div>
+    </>
+  )
 
-      {/* Provider Details Dialog */}
+  // Single return statement with conditional rendering
+  return (
+    <div>
+      {filterUI}
+
+      {/* Conditionally render either mobile or desktop UI */}
+      {isMobile ? (
+        <>
+          {mobileUI}
+          {mobilePagination}
+        </>
+      ) : (
+        desktopUI
+      )}
+
+      {/* Always render dialogs */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-auto">
           <DialogHeader>

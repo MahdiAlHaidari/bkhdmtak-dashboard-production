@@ -372,7 +372,11 @@ export function UsersList() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Avatar className="h-10 w-10">
-                    <AvatarImage src={getImageUrl(user.imagePath, true)} alt={user.name} onError={handleImageError} />
+                    <AvatarImage
+                      src={getImageUrl(user.imagePath, true) || "/placeholder.svg"}
+                      alt={user.name}
+                      onError={handleImageError}
+                    />
                     <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -397,15 +401,20 @@ export function UsersList() {
                 </div>
                 <div>
                   <div className="text-muted-foreground">Actions</div>
-                  <div className="mt-1 flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => viewUserDetails(user.id)}>
+                  <div className="mt-1 flex flex-col gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => viewUserDetails(user.id)}
+                      className="w-full justify-center"
+                    >
                       <Eye className="mr-1 h-3 w-3" />
                       View
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      className={user.isBlocked ? "text-green-600" : "text-red-600"}
+                      className={`w-full justify-center ${user.isBlocked ? "text-green-600" : "text-red-600"}`}
                       onClick={() => confirmStatusUpdate(user, !user.isBlocked)}
                     >
                       {user.isBlocked ? "Unblock" : "Block"}
@@ -582,7 +591,11 @@ export function UsersList() {
                 <TableCell>
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src={getImageUrl(user.imagePath, true)} alt={user.name} onError={handleImageError} />
+                      <AvatarImage
+                        src={getImageUrl(user.imagePath, true) || "/placeholder.svg"}
+                        alt={user.name}
+                        onError={handleImageError}
+                      />
                       <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div className="font-medium">{user.name}</div>

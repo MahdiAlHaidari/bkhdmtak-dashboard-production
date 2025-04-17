@@ -96,6 +96,7 @@ export function ProductsList() {
     setDetailsLoading(true)
     try {
       const productDetails = await getProductById(productId)
+      console.log("Product details:", productDetails) // Log the response for debugging
       setSelectedProduct(productDetails)
       setDetailsDialogOpen(true)
     } catch (err) {
@@ -172,6 +173,11 @@ export function ProductsList() {
       )
     }
     return <span className="font-medium">{price.toLocaleString()} IQD</span>
+  }
+
+  // Safe image URL getter with fallback
+  const getSafeImageUrl = (path: string | null | undefined) => {
+    return path ? getImageUrl(path) : "/placeholder.svg"
   }
 
   if (loading && products.length === 0) {
@@ -253,87 +259,86 @@ export function ProductsList() {
     </div>
   )
 
-  if (isMobile) {
-    return (
-      <div>
-        {filterUI}
-        <div className="space-y-4">
-          {products.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>No products found.</p>
-            </div>
-          ) : (
-            products.map((product) => (
-              <div key={product.id} className="rounded-lg border p-4">
-                <div className="flex items-center justify-between">
-                  <div className="font-medium">{product.name}</div>
-                  <div>{getApprovalBadge(product.isApproved)}</div>
+  // Determine which content to show based on screen size
+  const content = isMobile ? (
+    <>
+      {filterUI}
+      <div className="space-y-4">
+        {products.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <p>No products found.</p>
+          </div>
+        ) : (
+          products.map((product) => (
+            <div key={product.id} className="rounded-lg border p-4">
+              <div className="flex items-center justify-between">
+                <div className="font-medium">{product.name || "Unnamed Product"}</div>
+                <div>{getApprovalBadge(product.isApproved)}</div>
+              </div>
+              <div className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                {product.description || "No description"}
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <div className="text-muted-foreground">Price</div>
+                  <div className="mt-1">{formatPrice(product.price, product.discountAmount || 0)}</div>
                 </div>
-                <div className="mt-2 text-sm text-muted-foreground line-clamp-2">{product.description}</div>
-                <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
-                  <div>
-                    <div className="text-muted-foreground">Price</div>
-                    <div className="mt-1">{formatPrice(product.price, product.discountAmount)}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">Platform Fee</div>
-                    <div className="mt-1">{product.platformRatio * 100}%</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">Provider</div>
-                    <div className="mt-1">{product.provider.name}</div>
-                  </div>
-                  <div>
-                    <div className="text-muted-foreground">Category</div>
-                    <div className="mt-1">
-                      {product.category.nameEn} / {product.subCategory.nameEn}
-                    </div>
-                  </div>
+                <div>
+                  <div className="text-muted-foreground">Platform Fee</div>
+                  <div className="mt-1">{(product.platformRatio || 0) * 100}%</div>
                 </div>
-                <div className="mt-3">
-                  <Button variant="outline" size="sm" className="w-full" onClick={() => viewProductDetails(product.id)}>
-                    <Eye className="mr-1 h-3 w-3" />
-                    View Details
-                  </Button>
+                <div>
+                  <div className="text-muted-foreground">Provider</div>
+                  <div className="mt-1">{product.provider?.name || "N/A"}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Category</div>
+                  <div className="mt-1">
+                    {product.category?.nameEn || "N/A"} / {product.subCategory?.nameEn || "N/A"}
+                  </div>
                 </div>
               </div>
-            ))
-          )}
-        </div>
-
-        {/* Pagination for mobile */}
-        <div className="mt-4">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
-                  disabled={pageNumber <= 1}
-                />
-              </PaginationItem>
-              <PaginationItem>
-                <PaginationLink isActive>{pageNumber}</PaginationLink>
-              </PaginationItem>
-              {pageNumber < totalPages && (
-                <PaginationItem>
-                  <PaginationEllipsis />
-                </PaginationItem>
-              )}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
-                  disabled={pageNumber >= totalPages}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
+              <div className="mt-3">
+                <Button variant="outline" size="sm" className="w-full" onClick={() => viewProductDetails(product.id)}>
+                  <Eye className="mr-1 h-3 w-3" />
+                  View Details
+                </Button>
+              </div>
+            </div>
+          ))
+        )}
       </div>
-    )
-  }
 
-  return (
-    <div>
+      {/* Pagination for mobile */}
+      <div className="mt-4">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => setPageNumber((prev) => Math.max(prev - 1, 1))}
+                disabled={pageNumber <= 1}
+              />
+            </PaginationItem>
+            <PaginationItem>
+              <PaginationLink isActive>{pageNumber}</PaginationLink>
+            </PaginationItem>
+            {pageNumber < totalPages && (
+              <PaginationItem>
+                <PaginationEllipsis />
+              </PaginationItem>
+            )}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => setPageNumber((prev) => Math.min(prev + 1, totalPages))}
+                disabled={pageNumber >= totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    </>
+  ) : (
+    <>
       {filterUI}
       <div className="overflow-x-auto">
         <Table>
@@ -363,40 +368,42 @@ export function ProductsList() {
                       {product.images && product.images.length > 0 && (
                         <div className="h-10 w-10 rounded-md overflow-hidden">
                           <img
-                            src={getImageUrl(product.images[0].path) || "/placeholder.svg"}
-                            alt={product.name}
+                            src={getSafeImageUrl(product.images[0]?.path) || "/placeholder.svg"}
+                            alt={product.name || "Product"}
                             className="h-full w-full object-cover"
                             onError={handleImageError}
                           />
                         </div>
                       )}
                       <div>
-                        <div className="font-medium">{product.name}</div>
-                        <div className="text-xs text-muted-foreground line-clamp-1">{product.description}</div>
+                        <div className="font-medium">{product.name || "Unnamed Product"}</div>
+                        <div className="text-xs text-muted-foreground line-clamp-1">
+                          {product.description || "No description"}
+                        </div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium">{product.category.nameEn}</span>
-                      <span className="text-xs text-muted-foreground">{product.subCategory.nameEn}</span>
+                      <span className="font-medium">{product.category?.nameEn || "N/A"}</span>
+                      <span className="text-xs text-muted-foreground">{product.subCategory?.nameEn || "N/A"}</span>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <Avatar className="h-6 w-6">
                         <AvatarImage
-                          src={getImageUrl(product.provider.imagePath)}
-                          alt={product.provider.name}
+                          src={getSafeImageUrl(product.provider?.imagePath) || "/placeholder.svg"}
+                          alt={product.provider?.name || "Provider"}
                           onError={handleImageError}
                         />
-                        <AvatarFallback>{product.provider.name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback>{(product.provider?.name || "P").charAt(0)}</AvatarFallback>
                       </Avatar>
-                      <span>{product.provider.name}</span>
+                      <span>{product.provider?.name || "N/A"}</span>
                     </div>
                   </TableCell>
-                  <TableCell>{formatPrice(product.price, product.discountAmount)}</TableCell>
-                  <TableCell>{(product.platformRatio * 100).toFixed(0)}%</TableCell>
+                  <TableCell>{formatPrice(product.price, product.discountAmount || 0)}</TableCell>
+                  <TableCell>{((product.platformRatio || 0) * 100).toFixed(0)}%</TableCell>
                   <TableCell>{getApprovalBadge(product.isApproved)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
@@ -470,8 +477,15 @@ export function ProductsList() {
           </PaginationContent>
         </Pagination>
       </div>
+    </>
+  )
 
-      {/* Product Details Dialog */}
+  // Return the main component with the Dialog outside the conditional rendering
+  return (
+    <div>
+      {content}
+
+      {/* Product Details Dialog - moved outside conditional rendering */}
       <Dialog open={detailsDialogOpen} onOpenChange={setDetailsDialogOpen}>
         <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[90vh] overflow-auto">
           <DialogHeader>
@@ -487,21 +501,27 @@ export function ProductsList() {
             <div className="space-y-6">
               {/* Product Basic Info */}
               <div className="flex flex-col sm:flex-row gap-4 items-start">
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden">
-                  <img
-                    src={getImageUrl(selectedProduct.images[0].path) || "/placeholder.svg"}
-                    alt={selectedProduct.name}
-                    className="object-cover w-full h-full"
-                    onError={handleImageError}
-                  />
+                <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-gray-100">
+                  {selectedProduct.images && selectedProduct.images.length > 0 ? (
+                    <img
+                      src={getSafeImageUrl(selectedProduct.images[0]?.path) || "/placeholder.svg"}
+                      alt={selectedProduct.name || "Product"}
+                      className="object-cover w-full h-full"
+                      onError={handleImageError}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-500">
+                      No Image
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-bold">{selectedProduct.name}</h3>
-                  <p className="text-muted-foreground">{selectedProduct.description}</p>
+                  <h3 className="text-xl font-bold">{selectedProduct.name || "Unnamed Product"}</h3>
+                  <p className="text-muted-foreground">{selectedProduct.description || "No description available"}</p>
                   <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <p className="text-sm text-muted-foreground">Price</p>
-                      <p>{formatPrice(selectedProduct.price, selectedProduct.discountAmount)}</p>
+                      <p>{formatPrice(selectedProduct.price, selectedProduct.discountAmount || 0)}</p>
                     </div>
                     <div>
                       <p className="text-sm text-muted-foreground">Status</p>
@@ -512,65 +532,73 @@ export function ProductsList() {
               </div>
 
               {/* Provider Information */}
-              <div>
-                <h4 className="text-lg font-semibold mb-2">Provider</h4>
-                <div className="flex items-center gap-3 p-3 border rounded-md">
-                  <Avatar className="h-10 w-10">
-                    <AvatarImage
-                      src={getImageUrl(selectedProduct.provider.imagePath)}
-                      alt={selectedProduct.provider.name}
-                      onError={handleImageError}
-                    />
-                    <AvatarFallback>{selectedProduct.provider.name.charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-medium">{selectedProduct.provider.name}</p>
-                    <p className="text-sm text-muted-foreground">{selectedProduct.provider.phoneNumber}</p>
+              {selectedProduct.provider && (
+                <div>
+                  <h4 className="text-lg font-semibold mb-2">Provider</h4>
+                  <div className="flex items-center gap-3 p-3 border rounded-md">
+                    <Avatar className="h-10 w-10">
+                      <AvatarImage
+                        src={getSafeImageUrl(selectedProduct.provider.imagePath) || "/placeholder.svg"}
+                        alt={selectedProduct.provider.name || "Provider"}
+                        onError={handleImageError}
+                      />
+                      <AvatarFallback>{(selectedProduct.provider.name || "P").charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <p className="font-medium">{selectedProduct.provider.name || "N/A"}</p>
+                      <p className="text-sm text-muted-foreground">{selectedProduct.provider.phoneNumber || "N/A"}</p>
+                    </div>
+                    <div className="ml-auto text-sm text-muted-foreground">
+                      ID: {selectedProduct.provider.id || "N/A"}
+                    </div>
                   </div>
-                  <div className="ml-auto text-sm text-muted-foreground">ID: {selectedProduct.provider.id}</div>
                 </div>
-              </div>
+              )}
 
               {/* Category and Subcategory */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-lg font-semibold mb-2">Category</h4>
-                  <div className="flex items-center gap-3 p-3 border rounded-md">
-                    {selectedProduct.category.colorCode && (
-                      <div
-                        className="w-4 h-4 rounded-full"
-                        style={{
-                          backgroundColor: selectedProduct.category.colorCode?.startsWith("#")
-                            ? selectedProduct.category.colorCode
-                            : `#${selectedProduct.category.colorCode}` || "#cccccc",
-                        }}
-                      ></div>
-                    )}
-                    <div>
-                      <p className="font-medium">{selectedProduct.category.nameEn}</p>
-                      <p className="text-sm text-muted-foreground">{selectedProduct.category.nameAr}</p>
+                {selectedProduct.category && (
+                  <div>
+                    <h4 className="text-lg font-semibold mb-2">Category</h4>
+                    <div className="flex items-center gap-3 p-3 border rounded-md">
+                      {selectedProduct.category.colorCode && (
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{
+                            backgroundColor: selectedProduct.category.colorCode?.startsWith("#")
+                              ? selectedProduct.category.colorCode
+                              : `#${selectedProduct.category.colorCode}` || "#cccccc",
+                          }}
+                        ></div>
+                      )}
+                      <div>
+                        <p className="font-medium">{selectedProduct.category.nameEn || "N/A"}</p>
+                        <p className="text-sm text-muted-foreground">{selectedProduct.category.nameAr || "N/A"}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div>
-                  <h4 className="text-lg font-semibold mb-2">Subcategory</h4>
-                  <div className="flex items-center gap-3 p-3 border rounded-md">
-                    {selectedProduct.subCategory.colorCode && (
-                      <div
-                        className="w-4 h-4 rounded-full"
-                        style={{
-                          backgroundColor: selectedProduct.subCategory.colorCode?.startsWith("#")
-                            ? selectedProduct.subCategory.colorCode
-                            : `#${selectedProduct.subCategory.colorCode}` || "#cccccc",
-                        }}
-                      ></div>
-                    )}
-                    <div>
-                      <p className="font-medium">{selectedProduct.subCategory.nameEn}</p>
-                      <p className="text-sm text-muted-foreground">{selectedProduct.subCategory.nameAr}</p>
+                )}
+                {selectedProduct.subCategory && (
+                  <div>
+                    <h4 className="text-lg font-semibold mb-2">Subcategory</h4>
+                    <div className="flex items-center gap-3 p-3 border rounded-md">
+                      {selectedProduct.subCategory.colorCode && (
+                        <div
+                          className="w-4 h-4 rounded-full"
+                          style={{
+                            backgroundColor: selectedProduct.subCategory.colorCode?.startsWith("#")
+                              ? selectedProduct.subCategory.colorCode
+                              : `#${selectedProduct.subCategory.colorCode}` || "#cccccc",
+                          }}
+                        ></div>
+                      )}
+                      <div>
+                        <p className="font-medium">{selectedProduct.subCategory.nameEn || "N/A"}</p>
+                        <p className="text-sm text-muted-foreground">{selectedProduct.subCategory.nameAr || "N/A"}</p>
+                      </div>
                     </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Product Images */}
@@ -578,11 +606,11 @@ export function ProductsList() {
                 <div>
                   <h4 className="text-lg font-semibold mb-2">Product Images</h4>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    {selectedProduct.images.map((image) => (
-                      <div key={image.id} className="relative aspect-square rounded-lg overflow-hidden border">
+                    {selectedProduct.images.map((image, index) => (
+                      <div key={image.id || index} className="relative aspect-square rounded-lg overflow-hidden border">
                         <img
-                          src={getImageUrl(image.path) || "/placeholder.svg"}
-                          alt={`Product image ${image.id}`}
+                          src={getSafeImageUrl(image.path) || "/placeholder.svg"}
+                          alt={`Product image ${image.id || index + 1}`}
                           className="object-cover w-full h-full"
                           onError={handleImageError}
                         />
@@ -602,11 +630,11 @@ export function ProductsList() {
                   </div>
                   <div className="p-3 border rounded-md">
                     <p className="text-sm text-muted-foreground">Discount</p>
-                    <p className="font-medium">{(selectedProduct.discountAmount * 100).toFixed(0)}%</p>
+                    <p className="font-medium">{((selectedProduct.discountAmount || 0) * 100).toFixed(0)}%</p>
                   </div>
                   <div className="p-3 border rounded-md">
                     <p className="text-sm text-muted-foreground">Platform Commission</p>
-                    <p className="font-medium">{(selectedProduct.platformRatio * 100).toFixed(0)}%</p>
+                    <p className="font-medium">{((selectedProduct.platformRatio || 0) * 100).toFixed(0)}%</p>
                   </div>
                 </div>
               </div>

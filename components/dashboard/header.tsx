@@ -13,6 +13,8 @@ import {
   LogOut,
   ShoppingBag,
   Calendar,
+  CreditCard,
+  Shield,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import {
@@ -69,6 +71,8 @@ export function DashboardHeader() {
                 { title: "Services", href: "/dashboard/services", icon: BarChart3 },
                 { title: "Products", href: "/dashboard/products", icon: ShoppingBag },
                 { title: "Categories", href: "/dashboard/categories", icon: Layers },
+                { title: "Payments", href: "/dashboard/payments", icon: CreditCard },
+                { title: "Admins", href: "/dashboard/admins", icon: Shield },
                 { title: "Settings", href: "/dashboard/settings", icon: Settings },
               ].map((link) => {
                 const Icon = link.icon
