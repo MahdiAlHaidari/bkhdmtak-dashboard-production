@@ -30,14 +30,20 @@ export async function getProviders(params: ProviderListParams = {}): Promise<Pag
   return response.json()
 }
 
-export async function updateProviderStatus(id: number, isActive: boolean): Promise<void> {
+export async function updateProviderStatus(providerId: number, isActive: boolean): Promise<void> {
   const token = getAuthToken()
 
-  const response = await fetch(`${API_BASE_URL}/Admin/Provider/${id}/SetActive?isActive=${isActive}`, {
-    method: "PUT",
+  // Updated to use the correct endpoint and method
+  const response = await fetch(`${API_BASE_URL}/Admin/Provider/UpdateStatus`, {
+    method: "PATCH",
     headers: {
       Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     },
+    body: JSON.stringify({
+      providerId,
+      isActive,
+    }),
   })
 
   if (!response.ok) {
